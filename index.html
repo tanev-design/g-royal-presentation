@@ -198,6 +198,9 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
 .plate .kicker{text-shadow:0 1px 12px rgba(0,0,0,.5)}
 .plate .quote{font-family:'Space Grotesk',sans-serif;font-weight:500;line-height:1.24;letter-spacing:-.015em;font-size:clamp(1.4rem,3vw,2.45rem);color:#fff;text-shadow:0 2px 26px rgba(0,0,0,.6)}
 .plate .quote em{font-style:italic;color:#fff;opacity:.78}
+/* faded full-bleed backgrounds — subtle ghosted photo, white text on dark */
+.plate.faded .bgimg,.close.faded .bgimg{background:#0c0c0d}
+.plate.faded .bgimg img,.close.faded .bgimg img{opacity:.2}
 
 /* ---------- NUMBERS ---------- */
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid var(--line)}
@@ -445,7 +448,7 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
   </section>
 
   <!-- 03 MISSION (cinematic) -->
-  <section class="slide plate tl" data-nav="Mission" data-theme-lock="dark">
+  <section class="slide plate tl faded" data-nav="Mission" data-theme-lock="dark">
     <div class="bgimg"><img src="https://cdn.jsdelivr.net/gh/tanev-design/g-royal-presentation@main/assets/food-tanker-side.jpeg" alt="G-Royal food-grade tanker" style="object-position:center 42%" /></div>
     <div class="scrim"></div>
     <span class="idx">03</span>
@@ -541,7 +544,7 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
   </section>
 
   <!-- 07 CLEAN CARGO (plate) -->
-  <section class="slide plate sc-left" data-nav="Clean cargo" data-theme-lock="dark">
+  <section class="slide plate sc-left faded" data-nav="Clean cargo" data-theme-lock="dark">
     <div class="bgimg"><img src="https://cdn.jsdelivr.net/gh/tanev-design/g-royal-presentation@main/assets/sanitization.jpeg" alt="Tanker being professionally cleaned" style="object-position:70% center" /></div>
     <div class="scrim"></div>
     <span class="idx">07</span>
@@ -650,7 +653,7 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
   </section>
 
   <!-- 12 CLOSE -->
-  <section class="slide close" data-nav="Contact" data-theme-lock="dark">
+  <section class="slide close faded" data-nav="Contact" data-theme-lock="dark">
     <div class="bgimg"><img src="https://cdn.jsdelivr.net/gh/tanev-design/g-royal-presentation@main/assets/daf-food-tanker.jpeg" alt="G-Royal food tanker on a clear day" style="object-position:center 60%" /></div>
     <div class="scrim"></div>
     <div class="wrap">
