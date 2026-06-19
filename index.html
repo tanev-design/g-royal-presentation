@@ -119,6 +119,40 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
 .scrollcue .lane{stroke:#fff;stroke-width:2.6;stroke-dasharray:6 9;stroke-linecap:round;opacity:.95;animation:laneMove 1.05s linear infinite}
 @keyframes laneMove{to{stroke-dashoffset:-30}}
 
+/* ---------- FILM-LENS SLIDE NAV (right rail) ---------- */
+.lens-rail{position:fixed;z-index:200;right:clamp(10px,1.5vw,22px);top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:clamp(7px,1.05vh,13px);
+  padding:15px 8px;border-radius:40px;background:var(--panel);border:1px solid var(--line);
+  box-shadow:var(--shadow);transition:background .4s,border-color .4s}
+/* focus-scale groove down the barrel */
+.lens-rail::before{content:'';position:absolute;top:16px;bottom:16px;left:50%;width:1px;transform:translateX(-50%);
+  background:linear-gradient(180deg,transparent,var(--line) 14%,var(--line) 86%,transparent)}
+/* knurled grip on the edges */
+.lens-rail::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.7;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,var(--line-2) 3px 4px);
+  -webkit-mask-image:linear-gradient(90deg,#000,transparent 26%,transparent 74%,#000);
+          mask-image:linear-gradient(90deg,#000,transparent 26%,transparent 74%,#000)}
+.lens-dot{position:relative;width:22px;height:17px;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.lens-dot i{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.55;
+  transform:translate(-50%,-50%);transition:width .4s var(--ease),height .4s var(--ease),background .4s,opacity .4s,box-shadow .4s}
+.lens-dot:hover i,.lens-dot:focus-visible i{opacity:1;width:9px;height:9px;background:var(--fg)}
+/* active slide = a red hexagonal aperture, ringed like a lens opening */
+.lens-dot.active i{width:13px;height:13px;opacity:1;background:var(--accent-2);
+  clip-path:polygon(50% 1%,93% 26%,93% 74%,50% 99%,7% 74%,7% 26%);
+  box-shadow:0 0 0 3px var(--accent-soft),0 0 14px -2px var(--accent-2)}
+.lens-dot.active::before,.lens-dot.active::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
+.lens-dot.active::before{width:19px;height:19px;border:1.5px solid var(--accent-2);opacity:.6}
+.lens-dot.active::after{width:25px;height:25px;border:1px solid var(--accent-soft)}
+/* engraved slide label on hover */
+.lens-dot span{position:absolute;right:calc(100% + 13px);top:50%;transform:translateY(-50%) translateX(6px);
+  white-space:nowrap;font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px;box-shadow:var(--shadow);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s var(--ease),transform .35s var(--ease),visibility .35s}
+.lens-dot span b{color:var(--accent-2);font-weight:600;margin-right:6px}
+.lens-dot:hover span,.lens-dot:focus-visible span{opacity:1;visibility:visible;transform:translateY(-50%)}
+@media (max-width:680px){.lens-rail{display:none}}
+@media (max-height:560px){.lens-rail{display:none}}
+
 /* ---------- DECK / SLIDES ---------- */
 .deck{position:fixed;inset:0;z-index:1;overflow:hidden;overscroll-behavior:none}
 .deck::-webkit-scrollbar{display:none}
@@ -475,7 +509,7 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
   :root,:root[data-theme="night"]{--bg:#f3f0e9;--bg-2:#eceae1;--panel:#fff;--panel-2:#f7f5ef;--fg:#16140f;--fg-soft:#3a382f;--muted:#76726a;--line:rgba(20,19,15,.13);--line-2:rgba(20,19,15,.07);--accent:#9a1b1f;--accent-soft:rgba(154,27,31,.12);--accent-2:#9a1b1f;--shadow:0 30px 80px -34px rgba(20,19,15,.34)}
   .idx{display:none}
   html,body{height:auto;overflow:visible;background:#fff}
-  .cursor-dot,.cursor-ring,.splash,.chrome,.progress,.rail,.scrollcue,.tgl,.counter,.grain,.modal,.more-cue{display:none!important}
+  .cursor-dot,.cursor-ring,.splash,.chrome,.progress,.rail,.lens-rail,.scrollcue,.tgl,.counter,.grain,.modal,.more-cue{display:none!important}
   .slide::before,.slide::after,.cardx::before,.comp .c::before,.frame::after,.plate.carded .cmedia::after{display:none!important}
   .cover .h1 .hl::before{transform:none!important}
   .deck{position:static!important;height:auto;overflow:visible;display:block}
@@ -527,6 +561,9 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
   </button>
 </div>
 <div class="progress" id="progress"></div>
+
+<!-- FILM-LENS SLIDE NAVIGATION (right rail) -->
+<nav class="lens-rail" id="lensRail" aria-label="Slide navigation"></nav>
 
 <!-- SCROLL CUE — receding road lane, click to continue -->
 <button class="scrollcue" id="cue" aria-label="Scroll to continue">
@@ -832,6 +869,7 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
     current=n;
     progress.style.width=(slides.length>1?current/(slides.length-1)*100:0)+'%';
     if(current>0)cue.classList.add('hide');else cue.classList.remove('hide');
+    updateRail();
   }
   function step(d){
     if(navLock)return;
@@ -857,9 +895,25 @@ body.cursor-down .cursor-ring{width:30px;height:30px}
   /* scroll cue */
   cue.addEventListener('click',function(){step(1);});
 
+  /* film-lens right rail — one aperture per slide, click to jump */
+  var lensRail=document.getElementById('lensRail'), lensDots=[];
+  if(lensRail){
+    slides.forEach(function(s,i){
+      var b=document.createElement('button');
+      b.type='button';b.className='lens-dot';
+      var num=('0'+(i+1)).slice(-2), nav=s.getAttribute('data-nav')||('Slide '+(i+1));
+      b.setAttribute('aria-label',num+' '+nav);
+      b.innerHTML='<span><b>'+num+'</b>'+nav+'</span><i></i>';
+      b.addEventListener('click',function(){show(i);});
+      lensRail.appendChild(b);lensDots.push(b);
+    });
+  }
+  function updateRail(){for(var i=0;i<lensDots.length;i++){lensDots[i].classList.toggle('active',i===current);}}
+
   /* init first slide */
   slides[0].classList.add('show','in');
   runCounters(slides[0]);
+  updateRail();
 
   function parallax(){} /* image scroll-parallax retired with the scroll deck */
 
